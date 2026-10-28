@@ -1,0 +1,7 @@
+algoritmo,ambiente_treino,ambiente_teste,episodios,media_acoes,desvio_padrao_acoes,sucessos,truncados,reward_medio,media_acoes_sucessos,desvio_padrao_acoes_sucessos,taxa_sucesso
+QLearning,deterministico,deterministico,500,12.95,2.5074887836239665,500,0,8.05,12.95,2.5074887836239665,100.0
+QLearning,deterministico,nao-deterministico,500,30.304,32.862921111794066,483,17,-10.018,24.33126293995859,8.292154730949084,96.6
+QLearning,nao-deterministico,nao-deterministico,500,24.728,8.790564031960635,500,0,-3.728,24.728,8.790564031960635,100.0
+Sarsa,deterministico,deterministico,500,12.958,2.494841878757049,500,0,8.042,12.958,2.494841878757049,100.0
+Sarsa,deterministico,nao-deterministico,500,30.46,32.06475323466563,484,16,-10.132,24.855371900826448,8.973086024081908,96.8
+Sarsa,nao-deterministico,nao-deterministico,500,24.822,8.730997422975223,500,0,-3.822,24.822,8.730997422975223,100.0
