@@ -15,6 +15,13 @@ Neste projeto, treinamos um táxi para buscar um passageiro e deixá-lo no desti
 
 Cada caso tem seu próprio gráfico de aprendizado, gráfico de média e desvio padrão das ações, tabela dos testes e análise. Depois, comparamos os dois algoritmos no mesmo gráfico, como pede o enunciado. Também fizemos o teste da questão 4: usar as tabelas aprendidas sem chuva no ambiente com chuva, sem treinar novamente.
 
+Cada caso também tem uma animação do táxi andando no notebook. Os GIFs mostram a ação escolhida, o movimento que aconteceu e o passageiro sendo buscado e entregue. Usamos a primeira Q-table de cada caso e o mesmo estado inicial nas quatro demonstrações.
+
+| | Sem chuva | Com chuva |
+| --- | --- | --- |
+| Q-Learning | ![Q-Learning sem chuva](img/taxi-QLearning-deterministico.gif) | ![Q-Learning com chuva](img/taxi-QLearning-nao-deterministico.gif) |
+| Sarsa | ![Sarsa sem chuva](img/taxi-Sarsa-deterministico.gif) | ![Sarsa com chuva](img/taxi-Sarsa-nao-deterministico.gif) |
+
 Com `is_rainy=True, rainy_probability=0.6`, o táxi tem 60% de chance de seguir a direção escolhida e 20% de ir para cada lado. Se ele escolher direita e acabar indo para cima, por exemplo, a atualização continua na ação direita da Q-table, usando o estado em que ele realmente chegou.
 
 ## Estrutura
@@ -25,12 +32,15 @@ As classes e os scripts ficam em `src`, as Q-tables em `src/data` e os resultado
 Relatorio.ipynb
 README.md
 requirements.txt
+img/
+    taxi-<algoritmo>-<ambiente>.gif
 src/
     QLearning.py
     Sarsa.py
     TaxiDriverGym.py
     Taxi-QLearning.py
     Taxi-Sarsa.py
+    Taxi-Animacao.py
     data/
         q-table-Taxi-<algoritmo>-<ambiente>-<execucao>.csv
     results/
@@ -63,6 +73,12 @@ Para refazer todos os treinamentos e gerar os CSVs e gráficos:
 ```
 
 Depois, abra o notebook e execute todas as células para atualizar o relatório. Também é possível refazer o treinamento pelo próprio notebook, mudando `TREINAR_NOVAMENTE` para `True`.
+
+Para gerar só as animações, usando as Q-tables que já estão salvas:
+
+```powershell
+.\.venv\Scripts\python.exe src\Taxi-Animacao.py
+```
 
 Para treinar só um algoritmo:
 

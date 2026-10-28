@@ -5,6 +5,9 @@ import gymnasium as gym
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib import get_data_path
+import imageio.v2 as imageio
+from PIL import Image, ImageDraw, ImageFont
 from QLearning import QLearning
 from Sarsa import Sarsa
 
@@ -24,6 +27,7 @@ WINDOW = 100
 BASE = Path(__file__).resolve().parent
 DATA = BASE / 'data'
 RESULTS = BASE / 'results'
+IMG = BASE.parent / 'img'
 AMBIENTES = ['deterministico', 'nao-deterministico']
 ALGORITMOS = {'QLearning': QLearning, 'Sarsa': Sarsa}
 NOMES = {'QLearning': 'Q-Learning', 'Sarsa': 'Sarsa',
@@ -33,6 +37,60 @@ NOMES = {'QLearning': 'Q-Learning', 'Sarsa': 'Sarsa',
 def criar_ambiente(ambiente, render_mode=None):
     return gym.make('Taxi-v4', is_rainy=ambiente == 'nao-deterministico',
                     rainy_probability=RAINY_PROBABILITY, render_mode=render_mode)
+
+
+def gerar_animacao(algoritmo, ambiente, run=1, seed=10000):
+    IMG.mkdir(exist_ok=True)
+    q_table = np.loadtxt(DATA / 'q-table-Taxi-{}-{}-{}.csv'.format(algoritmo, ambiente, run), delimiter=',')
+    env = criar_ambiente(ambiente, render_mode='rgb_array')
+    (state, _) = env.reset(seed=seed)
+    actions = 0
+    rewards = 0
+    terminated = False
+    truncated = False
+    escorregoes = 0
+    frames = []
+    nomes_acoes = ['baixo', 'cima', 'direita', 'esquerda', 'buscar', 'deixar']
+    movimentos = {(1, 0): 'baixo', (-1, 0): 'cima', (0, 1): 'direita',
+                  (0, -1): 'esquerda', (0, 0): 'ficou no lugar'}
+    fonte = ImageFont.truetype(str(Path(get_data_path()) / 'fonts' / 'ttf' / 'DejaVuSans.ttf'), size=16)
+
+    def guardar_frame(acao, movimento):
+        frame = Image.fromarray(env.render())
+        imagem = Image.new('RGB', (frame.width, frame.height + 102), 'white')
+        imagem.paste(frame, (0, 102))
+        texto = ImageDraw.Draw(imagem)
+        passageiro = tuple(env.unwrapped.decode(state))[2]
+        situacao = 'Entregou o passageiro!' if terminated else (
+            'Limite de 200 ações' if truncated else (
+                'Passageiro no táxi' if passageiro == 4 else 'Indo buscar o passageiro'))
+        texto.text((12, 8), '{} | {}'.format(NOMES[algoritmo], NOMES[ambiente]), font=fonte, fill='black')
+        texto.text((12, 31), 'Passo: {} | Reward acumulado: {}'.format(actions, rewards), font=fonte, fill='black')
+        texto.text((12, 54), 'Escolheu: {} | Movimento: {}'.format(acao, movimento), font=fonte, fill='black')
+        texto.text((12, 77), situacao, font=fonte, fill='darkgreen' if terminated else 'black')
+        frames.append(np.asarray(imagem))
+
+    try:
+        guardar_frame('início', '-')
+        while not (terminated or truncated):
+            row, col, _, _ = tuple(env.unwrapped.decode(state))
+            action = np.argmax(q_table[state])
+            state, reward, terminated, truncated, _ = env.step(action)
+            next_row, next_col, _, _ = tuple(env.unwrapped.decode(state))
+            movimento = movimentos[(next_row - row, next_col - col)]
+            if action < 4 and movimento != 'ficou no lugar' and movimento != nomes_acoes[action]:
+                escorregoes = escorregoes + 1
+            actions = actions + 1
+            rewards = rewards + reward
+            guardar_frame(nomes_acoes[action], movimento)
+    finally:
+        env.close()
+
+    filename = IMG / 'taxi-{}-{}.gif'.format(algoritmo, ambiente)
+    duracoes = [800] + [350] * (len(frames) - 2) + [1800]
+    imageio.mimsave(filename, frames, format='GIF', duration=duracoes, loop=0)
+    return filename, {'acoes': actions, 'reward': rewards, 'sucesso': bool(terminated),
+                      'truncado': bool(truncated), 'escorregoes_visiveis': escorregoes}
 
 
 def avaliar(q_table, algoritmo, treino, teste, run, seed):
