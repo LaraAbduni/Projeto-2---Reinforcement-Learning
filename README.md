@@ -1,3 +1,5 @@
+Arthur Alexadandre, Giovanna Scalco e Lara abduni
+
 # Projeto 2 - Reinforcement Learning
 
 O relatório está em **[Relatorio.ipynb](Relatorio.ipynb)**. Nele estão os gráficos, os resultados e as respostas das questões 1 a 5. O notebook já está executado, então dá para abrir e ver tudo sem treinar de novo.
